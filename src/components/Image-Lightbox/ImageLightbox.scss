@@ -1,0 +1,45 @@
+.lightbox-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0,0,0,.7);
+}
+
+.lightbox-container  img{
+    max-width: 80%;
+}
+
+.lightbox-container .navigation-container{
+    position: absolute;
+    width: 80%;
+}
+
+.lightbox-container span{
+    transition: all 0.3s;
+    position: absolute;
+    cursor: pointer;
+    font-size: 3em;
+    color: white;
+   
+}
+.lightbox-container span:hover{
+    transform: scale(1.5);
+}
+
+.lightbox-container .navigation-container .next{
+    left: 0;
+}
+
+.lightbox-container .navigation-container .prev{
+    right:0;
+}
+.lightbox-container  .close{
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}

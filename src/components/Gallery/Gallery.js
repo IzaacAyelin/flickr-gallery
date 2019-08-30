@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import { getImages } from '../api/flickr/actions';
 import Image from '../Image';
 import './Gallery.scss';
+import ImageLightbox from '../Image-Lightbox/ImageLightbox';
 
 class Gallery extends React.Component {
   static propTypes = {
@@ -11,27 +12,19 @@ class Gallery extends React.Component {
 
   constructor(props) {
     super(props);
+    this.pageNumber = 1;
     this.state = {
       images: [],
-      galleryWidth: this.getGalleryWidth()
+      lightbox: {
+        isActive: false,
+        startIndex: 0
+      }
     };
   }
 
-  getGalleryWidth(){
-    try {
-      return document.body.clientWidth;
-    } catch (e) {
-      return 1000;
-    }
-  }
-  getImages(tag) {
-    const getImagesUrl = `services/rest/?method=flickr.photos.search&api_key=522c1f9009ca3609bcbaf08545f067ad&tags=${tag}&tag_mode=any&per_page=100&format=json&nojsoncallback=1`;
-    const baseUrl = 'https://api.flickr.com/';
-    axios({
-      url: getImagesUrl,
-      baseURL: baseUrl,
-      method: 'GET'
-    })
+
+  getImages(query) {
+    getImages(query)
       .then(res => res.data)
       .then(res => {
         if (
@@ -40,29 +33,77 @@ class Gallery extends React.Component {
           res.photos.photo &&
           res.photos.photo.length > 0
         ) {
-          this.setState({images: res.photos.photo});
+          const images = query.page === 1 ? res.photos.photo : [...this.state.images, ...res.photos.photo];
+          this.setState({ images: images, isLoading: false });
         }
-      });
+      })
   }
 
+  infiniteScroll = () => {
+    if ((Math.ceil(document.documentElement.scrollTop) + document.documentElement.clientHeight) === document.documentElement.scrollHeight) {
+      this.pageNumber++;
+       this.getImages({ tags: this.props.tag, page: this.pageNumber })
+    }
+  }
+
+
   componentDidMount() {
-    this.getImages(this.props.tag);
-    this.setState({
-      galleryWidth: document.body.clientWidth
-    });
+    window.addEventListener('scroll', this.infiniteScroll)
+    this.getImages({ tags: this.props.tag, page: 1 });
   }
 
   componentWillReceiveProps(props) {
-    this.getImages(props.tag);
+    this.pageNumber = 1;
+    this.getImages({ tags: props.tag, page: 1 });
+  }
+
+  deleteImage = (id) => {
+    const images = this.state.images;
+    const index = images.findIndex(image => image.id === id);
+    images.splice(index, 1);
+    this.setState({ images: images });
+  }
+  expandImage = (id) => {
+    const index = this.state.images.findIndex(image => image.id === id);
+    this.setState({
+      lightbox: {
+        isActive: true,
+        startIndex: index
+      }
+    })
+  }
+
+  closeLightBox = () => {
+    this.setState({
+      lightbox: {
+        isActive: false,
+        startIndex: 0
+      }
+    })
+  }
+
+  rearange=(ids)=>{
+    const images = this.state.images;
+    let indexes = [];
+    ids.map((id)=>{
+      const index = images.findIndex(image=>image.id===id);
+      indexes.push(index)
+    });
+    const temp = images[indexes[0]];
+    images[indexes[0]]=images[indexes[1]];
+    images[indexes[1]]=temp;
+    this.setState({images:images});
   }
 
   render() {
     return (
-      <div className="gallery-root">
-        {this.state.images.map(dto => {
-          return <Image key={'image-' + dto.id} dto={dto} galleryWidth={this.state.galleryWidth}/>;
-        })}
-      </div>
+        <div className="gallery-root">
+          {this.state.images.map(dto => {
+            return <Image rearange={this.rearange} expandImage={this.expandImage} deleteImage={this.deleteImage} key={'image-' + dto.id} dto={dto} />;
+          })}
+          {this.state.lightbox.isActive && <ImageLightbox closeLightBox={this.closeLightBox} startIndex={this.state.lightbox.startIndex} images={this.state.images} />}
+        </div>
+        
     );
   }
 }

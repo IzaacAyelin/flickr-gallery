@@ -8,19 +8,43 @@ body, html {
 }
 
 .app-header {
-  background-color: #222;
   padding: 10px;
   color: white;
   font-size: 20pt;
+  background-color: rgba(0,0,0,.5)
+  
+}
+
+.app-header h2{
+  font-family: 'Righteous', cursive;
+  color:rgb(255,82,82);
+}
+
+.bg{
+  background-image: url('../../images/calm-montain-lake.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
 .app-input {
   line-height: 30px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+  border: none;
+  outline: none;
+  font-size: 20px;
   padding: 0 8px;
-  color: #666;
+  color: #fff;
+  width: 100%;
+  background-color: transparent;
+}
+.input-group{
+  border-bottom: 2px solid rgb(255,82,82);
   width: 400px;
-  margin-bottom: 30px;
+  margin: 30px auto;
+  display: flex;
+}
+
+@media screen and (max-width:550px){
+  .input-group {
+    width: 100%;
+  }
 }

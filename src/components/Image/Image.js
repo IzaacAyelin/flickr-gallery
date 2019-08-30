@@ -5,50 +5,83 @@ import './Image.scss';
 
 class Image extends React.Component {
   static propTypes = {
-    dto: PropTypes.object,
-    galleryWidth: PropTypes.number
+    dto: PropTypes.object
   };
-
   constructor(props) {
     super(props);
-    this.calcImageSize = this.calcImageSize.bind(this);
     this.state = {
-      size: 200
+      rotationValue: 0,
+      hoverClass: '',
+      imageUrl: ''
     };
   }
 
-  calcImageSize() {
-    const {galleryWidth} = this.props;
-    const targetSize = 200;
-    const imagesPerRow = Math.round(galleryWidth / targetSize);
-    const size = (galleryWidth / imagesPerRow);
-    this.setState({
-      size
-    });
+  lazyLoadImages = () => {
+    let element = document.getElementById(`${this.props.dto.id}`);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const elemTop = rect.top;
+      const isVisible = elemTop < window.innerHeight;
+      if (isVisible) {
+        this.setState({ imageUrl: this.urlFromDto(this.props.dto) })
+      }
+    }
   }
-
   componentDidMount() {
-    this.calcImageSize();
+    this.lazyLoadImages();
+    document.addEventListener('scroll', this.lazyLoadImages)
+  }
+  componentWillUnmount(){
+    document.removeEventListener('scroll', this.lazyLoadImages)
   }
 
   urlFromDto(dto) {
     return `https://farm${dto.farm}.staticflickr.com/${dto.server}/${dto.id}_${dto.secret}.jpg`;
   }
+  rotateImage = () => {
+    this.setState({ rotationValue: this.state.rotationValue + 90 })
+  }
+
+  dragStart = (e) => {
+    e.dataTransfer.setData('imageId', this.props.dto.id);
+  }
+
+  allowDrop = (e) => {
+    e.preventDefault();
+  }
+  drop = (e) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('imageId');
+    this.props.rearange([this.props.dto.id, id])
+    this.setState({ hoverClass: '' })
+  }
+  dragLeave = () => {
+    this.setState({ hoverClass: '' })
+  }
+  dragEnter = () => {
+    this.setState({ hoverClass: 'hover' })
+  }
 
   render() {
     return (
       <div
-        className="image-root"
+        id={this.props.dto.id}
+        className={`image-root ${this.state.hoverClass}`}
+        draggable="true"
+        onDragStart={this.dragStart}
+        onDragOver={this.allowDrop}
+        onDrop={this.drop}
+        onDragEnter={this.dragEnter}
+        onDragLeave={this.dragLeave}
         style={{
-          backgroundImage: `url(${this.urlFromDto(this.props.dto)})`,
-          width: this.state.size + 'px',
-          height: this.state.size + 'px'
+          backgroundImage: `url(${this.state.imageUrl})`,
+          transform: `rotate(${this.state.rotationValue}deg)`
         }}
-        >
-        <div>
-          <FontAwesome className="image-icon" name="sync-alt" title="rotate"/>
-          <FontAwesome className="image-icon" name="trash-alt" title="delete"/>
-          <FontAwesome className="image-icon" name="expand" title="expand"/>
+      >
+        <div style={{ transform: `rotate(-${this.state.rotationValue}deg)` }}>
+          <FontAwesome onClick={this.rotateImage} className="image-icon" name="sync-alt" title="rotate" />
+          <FontAwesome onClick={() => this.props.deleteImage(this.props.dto.id)} className="image-icon" name="trash-alt" title="delete" />
+          <FontAwesome onClick={() => this.props.expandImage(this.props.dto.id)} className="image-icon" name="expand" title="expand" />
         </div>
       </div>
     );

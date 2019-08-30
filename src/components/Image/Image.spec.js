@@ -1,21 +1,22 @@
 // import 'jsdom-global/register';
 import React from 'react';
-import {shallow} from 'enzyme';
-import sinon from 'sinon';
-import {expect} from 'chai';
+import { shallow } from 'enzyme';
+import { expect } from 'chai';
 import Image from './Image.js';
 
 describe('Image', () => {
 
-  const sampleImage = {id: '28420720169', owner: '59717246@N05', secret: 'd460443ecb', server: '4722', farm: 5};
-
+  const sampleImage = { id: '28420720169', owner: '59717246@N05', secret: 'd460443ecb', server: '4722', farm: 5 };
+  
   let wrapper;
-  const galleryWidth = 1111;
+  const initialState = {
+    rotationValue: 0
+  }
 
   const mountImage = () => {
     return shallow(
-      <Image dto={sampleImage} galleryWidth={galleryWidth}/>,
-      {lifecycleExperimental: true, attachTo: document.createElement('div')}
+      <Image dto={sampleImage} />,
+      { lifecycleExperimental: true, attachTo: document.createElement('div') }
     );
   };
 
@@ -24,19 +25,28 @@ describe('Image', () => {
   });
 
   it('render 3 icons on each image', () => {
-    expect(wrapper.find('FontAwesome').length).to.equal(3);
+    expect(wrapper.find('FontAwesome').length).to.be.equal(3);
   });
 
-  it('calc image size on mount', () => {
-    const spy = sinon.spy(Image.prototype, 'calcImageSize');
-    wrapper = mountImage();
-    expect(spy.called).to.be.true;
+
+  //Tasks Features Tests
+  it('has initial rotation value of 0', () => {
+    wrapper.setState(initialState, () => {
+      expect(wrapper.find('.image-root').prop('style')).to.have.property('transform', 'rotate(0deg)');
+    });
   });
 
-  it('calculate image size correctly', () => {
-    const imageSize = wrapper.state().size;
-    const remainder = galleryWidth % imageSize;
-    expect(remainder).to.be.lessThan(1);
+  it('should be marked as draggable', () => {
+    wrapper.setState(initialState, () => {
+      expect(wrapper.find('.image-root').prop('draggable')).to.be.equal('true');
+    });
   });
 
+  it('changes rotation value by 90 degrees', () => {
+    wrapper.setState(initialState, () => {
+      wrapper.instance().rotateImage()
+      expect(wrapper.find('.image-root').prop('style')).to.have.property('transform', 'rotate(90deg)');
+    });
+  });
 });
+
