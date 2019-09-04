@@ -62,12 +62,25 @@ class Image extends React.Component {
     this.setState({ hoverClass: 'hover' })
   }
 
-  
+  handlePress=(e)=>{
+    console.log(e.keyCode);
+    
+    if (e.keyCode === 69) {
+      this.props.expandImage(this.props.dto.id)
+    }
+    if (e.keyCode === 68) {
+      this.props.deleteImage(this.props.dto.id)
+    }
+    if (e.keyCode === 82) {
+      this.rotateImage()
+    }
+    
+  }
 
   render() {
     return (
       <div
-       
+        onKeyDown={this.handlePress}
         tabIndex={this.props.index+1}
         id={this.props.dto.id}
         className={`image-root ${this.state.hoverClass}`}
