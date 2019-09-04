@@ -62,9 +62,13 @@ class Image extends React.Component {
     this.setState({ hoverClass: 'hover' })
   }
 
+  
+
   render() {
     return (
       <div
+       
+        tabIndex={this.props.index+1}
         id={this.props.dto.id}
         className={`image-root ${this.state.hoverClass}`}
         draggable="true"

@@ -47,6 +47,10 @@
   }
 }
 
+.image-root:focus div{
+  visibility: visible
+}
+
 .hover{
   opacity: 0.3;
 }

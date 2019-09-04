@@ -50,6 +50,7 @@ class Gallery extends React.Component {
   componentDidMount() {
     window.addEventListener('scroll', this.infiniteScroll)
     this.getImages({ tags: this.props.tag, page: 1 });
+    this.navigateByKeyboard();
   }
 
   componentWillReceiveProps(props) {
@@ -95,11 +96,37 @@ class Gallery extends React.Component {
     this.setState({images:images});
   }
 
+  navigateByKeyboard=()=>{
+    const element = document.querySelector('.gallery-root');
+    
+    element.addEventListener('keydown',(e)=>{
+      
+      const active = document.activeElement;
+      if (e.keyCode === 39 && active.nextSibling) {
+        active.nextSibling.focus();
+        // active.style.opacity='1';
+        // active.nextSibling.style.opacity='0.5';
+      }
+      if (e.keyCode === 37 && active.previousSibling) {
+        active.previousSibling.focus();
+        // active.style.opacity='1';
+        // active.previousSibling.style.opacity='0.5';
+      }
+    })
+  }
+
+
   render() {
     return (
         <div className="gallery-root">
-          {this.state.images.map(dto => {
-            return <Image rearange={this.rearange} expandImage={this.expandImage} deleteImage={this.deleteImage} key={'image-' + dto.id} dto={dto} />;
+          {this.state.images.map((dto,index) => {
+            return <Image
+            rearange={this.rearange}
+            expandImage={this.expandImage}
+            deleteImage={this.deleteImage}
+            key={'image-' + dto.id} dto={dto}
+            index={index}
+            />;
           })}
           {this.state.lightbox.isActive && <ImageLightbox closeLightBox={this.closeLightBox} startIndex={this.state.lightbox.startIndex} images={this.state.images} />}
         </div>
