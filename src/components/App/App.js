@@ -14,6 +14,14 @@ class App extends React.Component {
     };
   }
 
+  handleKeyDown=(e)=>{
+    if (e.keyCode === 13) {
+      this.setState({tag:e.target.value});
+      
+      
+    }
+  }
+
   render() {
     return (
       <div className="app-root">
@@ -21,7 +29,7 @@ class App extends React.Component {
           <div className="app-header">
             <h2>Flickr Gallery</h2>
             <div className="input-group">
-              <input className="app-input" onChange={event => this.setState({ tag: event.target.value })} value={this.state.tag} />
+              <input onKeyDown={this.handleKeyDown} className="app-input" />
               <FontAwesome name="search" title="search" />
             </div>
           </div>
